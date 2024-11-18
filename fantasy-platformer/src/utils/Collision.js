@@ -7,15 +7,20 @@ export const Collision = {
     },
 
     checkPlatformCollision(object, platform, tolerance) {
+        const prevY = object.y - object.velocityY;
+        const prevBottom = prevY + object.height;
+        
         const overlapX = object.x + object.width > platform.x && 
                         object.x < platform.x + platform.width;
         
         const fromBelow = object.velocityY < 0 && 
-                         Math.abs(object.y - (platform.y + platform.height)) <= tolerance &&
+                         prevY >= platform.y + platform.height &&
+                         object.y <= platform.y + platform.height + tolerance &&
                          overlapX;
         
         const fromAbove = object.velocityY >= 0 && 
-                         Math.abs((object.y + object.height) - platform.y) <= tolerance &&
+                         prevBottom <= platform.y &&
+                         object.y + object.height >= platform.y - tolerance &&
                          overlapX;
         
         return { overlapX, fromBelow, fromAbove };

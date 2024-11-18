@@ -42,14 +42,13 @@ export class Player {
         const onGround = platformManager.isOnGround(this);
         
         if (inputManager.isActionActive('jump')) {
-            if (!this.isJumping && onGround) {
+            if (!this.isJumping && onGround && this.velocityY >= 0) {
                 this.isJumping = true;
                 this.velocityY = -GAME_CONSTANTS.PLAYER.MAX_JUMP_STRENGTH;
             }
         }
         
         if (this.isJumping && !inputManager.isActionActive('jump')) {
-            // Cut the jump short if button is released
             if (this.velocityY < 0) {
                 this.velocityY *= 0.5;
             }
@@ -82,6 +81,12 @@ export class Player {
     updatePosition() {
         this.x += this.velocityX;
         this.y += this.velocityY;
+
+        // Check if player has fallen below ground level
+        if (this.y > GAME_CONSTANTS.WORLD.GROUND_LEVEL) {
+            const gameOverEvent = new Event('gameOver');
+            window.dispatchEvent(gameOverEvent);
+        }
     }
 
     updateCooldowns() {

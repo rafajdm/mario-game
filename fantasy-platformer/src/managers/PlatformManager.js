@@ -5,13 +5,17 @@ export class PlatformManager {
     constructor() {
         this.platforms = [
             { x: 0, y: 550, width: 400, height: 50 },
-            { x: 640, y: 550, width: 800, height: 50 },
+            { x: 600, y: 550, width: 400, height: 50 },
+            { x: 1050, y: 550, width: 400, height: 50 },
+            { x: 1600, y: 550, width: 400, height: 50 },
             { x: 200, y: 400, width: 100, height: 50 },
-            { x: 400, y: 300, width: 300, height: 50 }
+            { x: 400, y: 300, width: 300, height: 50 },
+            { x: 800, y: 350, width: 200, height: 50 }
         ];
     }
 
     checkCollisions(player) {
+        const prevY = player.y;
         player.isCollidingWithPlatform = false;
         
         for (const platform of this.platforms) {
@@ -27,18 +31,17 @@ export class PlatformManager {
                 player.isJumping = false;
                 player.jumpTime = 0;
                 player.isCollidingWithPlatform = true;
-                return;
+                return true;
             }
             
             if (collision.fromBelow) {
-                player.velocityY = 0;
                 player.y = platform.y + platform.height;
+                player.velocityY = Math.abs(player.velocityY * 0.5); // Bounce slightly
                 player.isJumping = false;
-                player.jumpTime = player.maxJumpTime;
-                player.isCollidingWithPlatform = true;
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     isOnGround(player) {

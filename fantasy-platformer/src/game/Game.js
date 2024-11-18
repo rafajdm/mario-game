@@ -68,31 +68,32 @@ export class Game {
     }
 
     update() {
-        const currentTime = performance.now();
-        this.deltaTime = (currentTime - this.lastTime) / 1000;
-        this.lastTime = currentTime;
-
         if (this.stateManager.current === GAME_CONSTANTS.GAME_STATE.PLAYING) {
-            // Apply gravity and update position first
-            this.player.applyGravity();
-            this.player.updatePosition();
-            
-            // Then check collisions
-            this.platformManager.checkCollisions(this.player);
-            
-            // Then handle input for next frame
+            // Handle input first
             this.player.handleMovement(this.inputManager);
             this.player.handleJump(this.inputManager, this.platformManager);
             
-            // Update other entities
-            this.enemyManager.update();
+            // Apply physics
+            this.player.applyGravity();
+            this.player.updatePosition();
+            
+            // Check enemy collisions first
             this.enemyManager.checkCollisions(this.player);
             
-            // Update camera last
-            this.updateCamera();
+            // Then check platform collisions
+            this.platformManager.checkCollisions(this.player);
             
-            // Clamp player to world bounds
+            // Update other entities
+            this.enemyManager.update();
+            
+            // Update camera and bounds
+            this.updateCamera();
             this.player.x = Math.max(0, Math.min(this.player.x, this.world.width - this.player.width));
+            
+            // Check for level completion
+            if (this.player.x >= GAME_CONSTANTS.WORLD.FINISH_LINE.X) {
+                this.stateManager.setState(GAME_CONSTANTS.GAME_STATE.LEVEL_COMPLETE);
+            }
         } else if (this.stateManager.current === GAME_CONSTANTS.GAME_STATE.GAME_OVER) {
             this.menuManager.update();
         } else if (this.stateManager.current === GAME_CONSTANTS.GAME_STATE.MENU) {
@@ -109,7 +110,19 @@ export class Game {
         this.ctx.save();
         this.ctx.translate(-this.camera.x, -this.camera.y);
         
+        // Draw platforms first
         this.platformManager.draw(this.ctx);
+        
+        // Draw finish line
+        this.ctx.fillStyle = GAME_CONSTANTS.WORLD.FINISH_LINE.COLOR;
+        this.ctx.fillRect(
+            GAME_CONSTANTS.WORLD.FINISH_LINE.X,
+            0,  // Start from top of screen
+            GAME_CONSTANTS.WORLD.FINISH_LINE.WIDTH,
+            GAME_CONSTANTS.WORLD.HEIGHT  // Extend to bottom of screen
+        );
+        
+        // Draw other game elements
         this.enemyManager.draw(this.ctx);
         this.player.draw(this.ctx);
         
@@ -190,7 +203,11 @@ export class Game {
                 this.draw();
             },
             [GAME_CONSTANTS.GAME_STATE.MENU]: () => this.drawMenu(),
-            [GAME_CONSTANTS.GAME_STATE.GAME_OVER]: () => this.drawGameOver()
+            [GAME_CONSTANTS.GAME_STATE.GAME_OVER]: () => this.drawGameOver(),
+            [GAME_CONSTANTS.GAME_STATE.LEVEL_COMPLETE]: () => {
+                this.draw();
+                this.uiRenderer.drawLevelComplete(this.ctx);
+            }
         };
 
         const handler = stateHandlers[this.stateManager.current];
