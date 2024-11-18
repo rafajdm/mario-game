@@ -43,17 +43,23 @@ export class EnemyManager {
         for (const enemy of this.enemies) {
             if (Collision.checkRectCollision(player, enemy)) {
                 if (this.isPlayerAboveEnemy(player, enemy)) {
+                    // Bounce player up when defeating enemy
+                    player.velocityY = -GAME_CONSTANTS.PLAYER.MAX_JUMP_STRENGTH * 0.7;
                     this.removeEnemy(enemy);
                 } else {
                     this.handlePlayerDeath(player);
                 }
+                return true;
             }
         }
+        return false;
     }
 
     isPlayerAboveEnemy(player, enemy) {
-        return player.y + player.height < enemy.y + enemy.height / 2 &&
-               player.velocityY > 0;
+        const playerBottom = player.y + player.height;
+        const enemyMidpoint = enemy.y + enemy.height / 2;
+        
+        return playerBottom <= enemyMidpoint && player.velocityY > 0;
     }
 
     removeEnemy(enemy) {

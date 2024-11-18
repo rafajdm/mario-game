@@ -81,4 +81,33 @@ export class UIRenderer {
         ctx.textBaseline = 'middle';
         ctx.fillText('New Game', x + width/2, y + height/2);
     }
+
+    drawLevelComplete(ctx) {
+        // Draw semi-transparent overlay
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        
+        // Draw "Level Complete!" text
+        ctx.fillStyle = GAME_CONSTANTS.UI.LEVEL_COMPLETE.TEXT_COLOR;
+        ctx.font = '48px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Level Complete!', ctx.canvas.width/2, ctx.canvas.height/3);
+        
+        // Draw continue button
+        const buttonWidth = GAME_CONSTANTS.UI.LEVEL_COMPLETE.BUTTON_WIDTH;
+        const buttonHeight = GAME_CONSTANTS.UI.LEVEL_COMPLETE.BUTTON_HEIGHT;
+        const buttonX = (ctx.canvas.width - buttonWidth) / 2;
+        const buttonY = ctx.canvas.height/2;
+        
+        ctx.fillStyle = GAME_CONSTANTS.UI.LEVEL_COMPLETE.BUTTON_COLOR;
+        ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+        
+        ctx.fillStyle = GAME_CONSTANTS.UI.LEVEL_COMPLETE.TEXT_COLOR;
+        ctx.font = GAME_CONSTANTS.UI.LEVEL_COMPLETE.FONT;
+        ctx.fillText('Continue', buttonX + buttonWidth/2, buttonY + buttonHeight/2);
+        
+        ctx.restore();
+    }
 }
